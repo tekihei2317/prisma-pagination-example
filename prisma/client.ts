@@ -34,16 +34,11 @@ export const xprisma = prisma.$extends({
         args: Prisma.Exact<A, Prisma.Args<T, "findMany">> & {
           page: number;
           perPage: number;
-          skip?: undefined;
-          take?: undefined;
-          cursor?: undefined;
-          distinct?: undefined;
         }
       ): Promise<Prisma.Result<T, A, "findMany">> {
         const { page, perPage } = args;
 
-        // @ts-ignore
-        return await this.findMany({
+        return await (this as any).findMany({
           ...omit(args, "page", "perPage"),
           skip: perPage * (page - 1),
           take: perPage,

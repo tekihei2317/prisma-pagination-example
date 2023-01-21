@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -7,16 +7,9 @@ async function main() {
     data: {
       email: "test@example.com",
       posts: {
-        create: [
-          { title: "Prismaでページネーションを実装する" },
-          { title: "Node.jsのconnectをコードリーディングしてみる" },
-          { title: "type-challengesのオンラインジャッジを作りました" },
-          { title: "記事1" },
-          { title: "記事2" },
-          { title: "記事3" },
-          { title: "記事4" },
-          { title: "記事5" },
-        ],
+        create: [...new Array(10)].map((_, index) => ({
+          title: `article ${index + 1}`,
+        })),
       },
     },
   });

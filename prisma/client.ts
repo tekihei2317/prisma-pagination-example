@@ -21,6 +21,12 @@ const omit: Omit = (obj, ...keys) => {
   return ret;
 };
 
+type PaginationResult<T, A> = {
+  items: Prisma.Result<T, A, "findMany">;
+  count: number;
+  pageCount: number;
+};
+
 export const xprisma = prisma.$extends({
   model: {
     user: {
@@ -35,14 +41,20 @@ export const xprisma = prisma.$extends({
           page: number;
           perPage: number;
         }
-      ): Promise<Prisma.Result<T, A, "findMany">> {
+      ): Promise<PaginationResult<T, A>> {
         const { page, perPage } = args;
 
-        return await (this as any).findMany({
-          ...omit(args, "page", "perPage"),
-          skip: perPage * (page - 1),
-          take: perPage,
-        });
+        const [items, count] = await Promise.all([
+          (this as any).findMany({
+            ...omit(args, "page", "perPage"),
+            skip: perPage * (page - 1),
+            take: perPage,
+          }),
+          (this as any).count({ where: (args as any).where }),
+        ]);
+        const pageCount = Math.ceil(count / perPage);
+
+        return { items, count, pageCount };
       },
     },
   },
